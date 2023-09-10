@@ -12,6 +12,8 @@ python = "^3.10"
 mkdocs-material = "^9.2.8"
 mkdocs-git-revision-date-localized-plugin = "^1.2.0"
 mkdocs-swagger-ui-tag = "^0.6.4"
+pillow = "^10.0.0"
+cairosvg = "^2.7.1"
 
 
 [build-system]
