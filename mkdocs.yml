@@ -22,15 +22,14 @@ theme:
   language: en
 
   features:
-    - header.autohide
     - content.code.annotate
     - content.code.copy
     - content.code.select
     - navigation.indexes
     - navigation.instant
-    - navigation.instant.prefetch
+    # - navigation.instant.prefetch
     - navigation.path
-    - navigation.tob
+    - navigation.top
     - navigation.tracking
     - search.highlight
     - search.share
@@ -43,7 +42,6 @@ theme:
     # - media: "(prefers-color-scheme)"
     #   primary: orange
     #   accent: orange
-    #   scheme: default
     #   toggle:
     #     icon: material/brightness-auto
     #     name: Switch to light mode
@@ -61,7 +59,7 @@ theme:
     - media: "(prefers-color-scheme: dark)"
       primary: orange
       accent: orange
-      scheme: default
+      scheme: slate
       toggle:
         icon: material/weather-night
         name: Switch to system preference
