@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "majordom-docs"
+version = "0.1.0"
+description = ""
+authors = ["Mark Parker <mark@parker-programs.com>"]
+license = "Attribution-NonCommercial-NoDerivatives 4.0 International"
+readme = "README.md"
+packages = [{include = "majordom_docs"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mkdocs-material = "^9.2.8"
+mkdocs-git-revision-date-localized-plugin = "^1.2.0"
+mkdocs-swagger-ui-tag = "^0.6.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
