@@ -1,1 +1,1 @@
-<swagger-ui src="https://bridge.majordom-dev.parker-programs.com/docs/swagger.json" />
+<swagger-ui src="https://bridge.majordom.parker-programs.com/docs/swagger.json" />

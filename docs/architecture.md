@@ -2,7 +2,7 @@ MajorDom consists of several key components: devices, hub, cloud, bridge, mobile
 
 Devices play a crucial role in the system as they enable control over physical parts of the home. They communicate using radio modules and the “Merlin” protocol that receive commands from the hub, and transmit events back to it.
 
-The hub is the central element of the system. It manages the devices and coordinates their operations. The hub holds the main database with information about users, home, rooms, and devices. Through a local HTTP server and WS server, the hub provides an API for interacting with the database and high-level controlling the devices.
+The hub is the central element of the system. It manages the devices and coordinates their operations. The hub holds the main database with information about users, home, rooms, and devices. Through a local HTTP server and WS server, the hub provides an API for interacting with the database and for high-level control of devices.
 
 The cloud is the server-side component and plays a vital role in user authentication. It stores the database of users, homes, hubs, and their access rights. Device models with a list of parameters and a firmware update system are also stored in the cloud.
 
@@ -17,5 +17,3 @@ Even a complete loss of internet connection on the hub is not a problem. All the
 Smart home control is achieved through a mobile application that provides a user-friendly interface. However, in practice, the role of the mobile application often reduces to system configuration, while day-to-day device management is carried out using automatic scenarios and the voice assistant.
 
 Like the hub, the voice assistant can work completely offline, ensuring security, privacy, and reliability of use.
-
-Most importantly, now anyone, even those without programming experience, can install the MajorDom system. In the next article, I will share a detailed guide on how to do it.
