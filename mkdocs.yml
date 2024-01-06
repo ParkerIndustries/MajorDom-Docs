@@ -3,7 +3,7 @@ site_url: https://docs.majordom.io
 site_author: Mark Parker
 site_description: MajorDom documentation
 
-copyright: Copyright &copy; MajorDom
+copyright: Copyright &copy; 2024 Parker Industries Inc. All rights reserved.
 
 nav:
   - Architecture Overview: 'architecture.md'
@@ -20,6 +20,7 @@ theme:
   name: material
   custom_dir: overrides
   language: en
+  favicon: img/favicon.png
 
   features:
     - content.code.annotate
@@ -68,8 +69,20 @@ extra:
   generator: false
   
   social:
+    - icon: majordom/logo
+      link: https://majordom.io
     - icon: fontawesome/brands/github 
       link: https://github.com/ParkerIndustries
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/majordom_io
+    - icon: fontawesome/brands/instagram
+      link: https://instagram.com/majordom_io
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/majordom-io
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/@majordom_io
+    - icon: fontawesome/brands/tiktok
+      link: https://www.tiktok.com/@majordom_io
   
   features:
     - navigation.footer
