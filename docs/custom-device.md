@@ -103,13 +103,24 @@ If you want to use other technologies, hardware, or software—e.g., a Raspberry
 
 Your device should host an HTTP server and expose the following RESTful API endpoints:
 
+`GET /api/v1/merlin`: Used by the Hub to get current device state
+**Reponse Payload:**
+```json
+[
+    {
+    "index": "<parameter_index: int in 0...255>",
+    "value": "<parameter_value: base64 encoded value>"
+    },
+]
+```
+
 `POST /api/v1/merlin`: Used by the Hub to send parameter updates to the device.
   
 **Request Payload:**
 ```json
 {
 "index": "<parameter_index: int in 0...255>",
-"value": "<parameter_value: int in 0...255>"
+"value": "<parameter_value: base64 encoded value>"
 }
 ```
 
@@ -131,11 +142,11 @@ To communicate with the Hub, the device should make HTTP requests to the Hub's  
 
 Send Parameter Updates: `{hub_host}/api/merlin/state`
   
-  **Request Payload:**
+**Request Payload:**
 ```json
 {
 "index": "<parameter_index: int in 0...255>",
-"value": "<parameter_value: int in 0...255>"
+"value": "<parameter_value: base64 encoded value>"
 }
 ```
 
@@ -154,4 +165,74 @@ Authentication is implemented using a long-lived JWT token included in the `Auth
 
 ```json
 "Authorization": "Bearer <JWT Token>"
+```
+
+#### Discovery  
+
+To make a device discoverable, setup zeroconf service of type `_majordom-device._tcp` and specify the port of the merlin interface server. Now Hub can find the device in your LAN.
+
+## Parameter (Value) Types
+
+Current available types:
+
+```python
+class ParameterType(str, Enum):
+    # Base types
+    integer = "integer"  # uint8
+    decimal = "decimal"  # uint8 casting from [0, 255] to [0, 1]
+    boolean = "boolean"  # real one-bit integer
+    enum = "enum"        # uint8 with string_representation
+    string = "string"    # string
+
+    humidity = "humidity"          # decimal;
+    temperature = "temperature"    # float8;
+    color_temperature = "color_temperature"  # Kelvin, decimal; 0.5 is white
+    rgb = "rgb"                    # hue wheel angle, decimal; TODO: uint8[3];
+    volume = "volume"              # decimal;
+    timeinterval = "timeinterval"  # seconds, int32;
+    
+    button = "button"              # None, just a button
+```
+
+Example of decoding:
+
+```python
+class DeviceParameter(Parameter): # pydantic.BaseModel
+    value: bytes
+    
+    class Config:
+        json_encoders = {
+            bytes: lambda v: base64.b64encode(v).decode()
+        }
+    
+    @validator('value', pre=True)
+    def base64_decode(cls, value: str) -> bytes:
+        if value is not None and isinstance(value, str):
+            return base64.b64decode(value)
+        return value
+    
+    @property
+    def decoded_value(self) -> int | float | bool | str | bytes:
+        match self.value_type:
+            
+            case ParameterType.integer | ParameterType.enum:
+                return max(0, min(int.from_bytes(self.value, 'big'), 255)) # int as uint8 in [0, 255]
+            
+            case ParameterType.timeinterval:
+                return int.from_bytes(self.value, 'big') # just int
+            
+            case ParameterType.decimal | ParameterType.humidity | ParameterType.temperature | ParameterType.color_temperature | ParameterType.rgb | ParameterType.volume:
+                return max(0, min(int.from_bytes(self.value, 'big'), 255)) / 255 # float in [0, 1] mapped from uint8 in [0, 255]
+            
+            case ParameterType.boolean:
+                return bool(self.value[0])
+            
+            case ParameterType.string:
+                return self.value.decode('utf-8') # utf-8 is default but explicit is better than implicit
+            
+            case ParameterType.button:
+                return b'\x00'
+            
+            case _:
+                return self.value
 ```
