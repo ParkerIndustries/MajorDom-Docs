@@ -6,15 +6,15 @@ site_description: MajorDom documentation
 copyright: Copyright &copy; 2024 Parker Industries Inc. All rights reserved.
 
 nav:
-  - Architecture Overview: 'architecture.md'
-  - Custom Device: 'custom-device.md'
+  - Architecture Overview: "architecture.md"
+  - Device Integration: "device-integration.md"
   - API:
-    - Cloud API: 'api/cloud.md'
-    - Bridge API: 'api/bridge.md'
-    - Hub API: 'api/hub.md'
+      - Cloud API: "api/cloud.md"
+      - Bridge API: "api/bridge.md"
+      - Hub API: "api/hub.md"
   - Hub Development:
-    - How to Start: 'hub-development/how-to-start.md'
-    - Repo Architecture: 'hub-development/repo-architecture.md'
+      - How to Start: "hub-development/how-to-start.md"
+  - Custom Device (legacy): "custom-device-legacy.md"
 
 theme:
   name: material
@@ -37,8 +37,7 @@ theme:
     - search.suggest
     - toc.follow
 
-  palette: 
-
+  palette:
     # Palette toggle for automatic mode
     # - media: "(prefers-color-scheme)"
     #   primary: orange
@@ -51,7 +50,7 @@ theme:
     - media: "(prefers-color-scheme: light)"
       primary: orange
       accent: orange
-      scheme: default 
+      scheme: default
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
@@ -67,11 +66,11 @@ theme:
 
 extra:
   generator: false
-  
+
   social:
     - icon: majordom/logo
       link: https://majordom.io
-    - icon: fontawesome/brands/github 
+    - icon: fontawesome/brands/github
       link: https://github.com/ParkerIndustries
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/majordom_io
@@ -83,7 +82,7 @@ extra:
       link: https://www.youtube.com/@majordom_io
     - icon: fontawesome/brands/tiktok
       link: https://www.tiktok.com/@majordom_io
-  
+
   features:
     - navigation.footer
 
