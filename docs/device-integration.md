@@ -44,6 +44,7 @@ services/controller/myintegration/
 
 - [ ] Discovery of new devices (`self.dependencies.output.controller_did_receive_discovery` is called)
 - [ ] Discovery of devices already paired to the Hub on reconnect, e.g. after a reboot (`self.dependencies.output.controller_did_connect_device` is called)
+- [ ] `start_pairing_window` is implemented if the protocol requires an explicit scan mode
 - [ ] Device pairing (`pair_device` is implemented)
 - [ ] Device schema is properly mapped: device info, parameter list, and each parameter's metadata are translated to MajorDom's domain model
 - [ ] Hub → Device control (`send_command` is implemented)
@@ -88,17 +89,37 @@ def discoveries(self) -> dict[UUID, Discovery]:
 
 The `UUID` for a given physical device must remain stable as long as it is visible.
 
+#### `start_pairing_window(duration_sec)`
+
+Optional. Override only if your protocol requires an explicit short-lived scan mode to surface new devices (e.g. Zigbee permit-join, BLE burst scan). Always-on discovery (mDNS, SSDP) does not need this. Default is a no-op.
+
 ---
 
 ### Injected Dependencies
 
 The Hub populates `self.dependencies` (see [`AbstractController.Dependencies`](https://github.com/ParkerIndustries/MajorDom-Hub/tree/develop/majordom_hub/services/controller/framework/abstract_controller.py)) before calling `start()`.
 
-It provides access to: a `ControllerOutput` callback object, the device repository, and a shared zeroconf instance for mDNS discovery.
+| Field | Type | Description |
+|---|---|---|
+| `output` | `ControllerOutput` | Callback object for pushing events to the Hub |
+| `make_device_repository` | `Callable[[], AsyncContextManager[DeviceRepository]]` | Factory for the device repository |
+| `zeroconf` | `AsyncZeroconf` | Shared zeroconf instance for mDNS discovery |
+| `register_zeroconf` | `Callable[[set[str]], None]` | Register mDNS service types to listen for |
+| `hardware_interfaces` | `list[str]` | OS-level hardware interface paths assigned to this integration (e.g. `/dev/ttyACM0`) |
 
 ---
 
 ### Storing Data
+
+#### File Storage (`documents_folder`)
+
+For files that cannot be stored in the database (e.g. a protocol's own SQLite DB, certificates, binary blobs), use `self.documents_folder`:
+
+```python
+path = self.documents_folder / "zigbee.db"
+```
+
+Resolves to a dedicated directory for this integration under the Hub's data root, created automatically on first write.
 
 #### integration_data
 
@@ -153,18 +174,28 @@ async with self.dependencies.make_device_repository() as repo:
 
 ### Notes
 
+#### Helper Methods
+
+`AbstractController` provides these `@final` helpers — do not override them:
+
+| Method / Property | Description |
+|---|---|
+| `self.name_slug` | URL-safe slug of `self.name`; used as a stable integration identifier |
+| `self.integration_uuid()` | Stable `UUID` for this integration, derived from `name_slug` |
+| `self.device_uuid(device_id)` | Stable `UUID` for a device given any unique string (MAC, serial, etc.) |
+| `self.parameter_uuid(device_uuid, parameter_id)` | Stable `UUID` for a parameter scoped to its device |
+| `self.documents_folder` | `Path` to this integration's file storage directory |
+
 #### IDs
 
-Use `uuid5` with a value that is stable and unique per device (e.g. a MAC address, a hardware serial, or a protocol-assigned pairing ID. For discoveries, device name is enough). This lets you reproduce the same UUID deterministically — no DB lookup needed, and IDs stay consistent across restarts and re-pairings.
-
-Discovery id isn't required to match Device id, but this is recommended. 
+Use the built-in helpers to generate deterministic UUIDs — no DB lookup needed, IDs stay consistent across restarts and re-pairings:
 
 ```python
-from uuid import uuid5, UUID
-
-device_id = uuid5(UUID(int=0), device_mac_or_serial)
-parameter_id = uuid5(device_id, f'{accessory_id}.{characteristic_id}')
+device_id = self.device_uuid(device_mac_or_serial)
+parameter_id = self.parameter_uuid(device_id, f'{accessory_id}.{characteristic_id}')
 ```
+
+Discovery `id` isn't required to match Device `id`, but this is recommended.
 
 #### For IP Devices
 
