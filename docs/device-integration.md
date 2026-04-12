@@ -254,6 +254,7 @@ class DeviceInfo(DevicePatch):
     manufacturer: str | None
     last_seen: datetime | None = None
     available: bool = False
+    main_parameter: UUID | None = None  # for the tap action on the room view, toggle in most cases
 
 class Device(DeviceInfo):
     integration_data: SerializeAsAny[dict | Base] = Field(default_factory=Base)
@@ -303,16 +304,23 @@ class ParameterRole(StrEnum):
     control = 'control' # read-write
     event = 'event'     # fire-and-forget
 
+class ParameterVisibility(StrEnum):
+    user = "user"  # main, everyday interaction, device screen widgets (on/off, brightness, volume)
+    setting = "setting"  # user-configurable, initial setup or low-frequency, like "auto off timer"
+    system = "system"  # firmware, diagnostics, internals; not visible
+
 class Parameter(UUIdentifable):
     id: UUID
     name: str
     data_type: ParameterDataType
     unit: ParameterUnit = ParameterUnit.plain
     role: ParameterRole
+    visibility: ParameterVisibility
     min_value: int | float | None = None
     max_value: int | float | None = None
     min_step: int | float | None = None
     valid_values: dict[int | float | str, str] | None = None  # value → display label
+    fields: list["Parameter"] | None = None  # schema for data_type=struct
     integration_data: Any
 
 class ParameterState(Parameter):
