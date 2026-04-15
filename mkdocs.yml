@@ -6,15 +6,25 @@ site_description: MajorDom documentation
 copyright: Copyright &copy; 2024 Parker Industries Inc. All rights reserved.
 
 nav:
-  - Architecture Overview: "architecture.md"
-  - Device Integration: "device-integration.md"
+  - MajorDom Docs: "index.md"
+  - Device Integration:
+      - Overview: "device-integration/index.md"
+      - Implementing a Controller: "device-integration/controller.md"
+      - Storing Data: "device-integration/storing_data.md"
+      - Data Models: "device-integration/data_models.md"
+      - Discovery Services:
+          - Overview: "device-integration/discovery/index.md"
+          - Zeroconf / mDNS: "device-integration/discovery/zeroconf.md"
+          - SSDP / UPnP: "device-integration/discovery/ssdp.md"
+          - BLE: "device-integration/discovery/ble.md"
   - API:
-      - Cloud API: "api/cloud.md"
-      - Bridge API: "api/bridge.md"
       - Hub API: "api/hub.md"
-  - Hub Development:
-      - How to Start: "hub-development/how-to-start.md"
-  - Custom Device (legacy): "custom-device-legacy.md"
+      - Bridge API: "api/bridge.md"
+      - Cloud API: "api/cloud.md"
+  - legacy:
+      - Architecture Overview: "architecture.md"
+      - "Hub Development: How to Start": "hub-development/how-to-start.md"
+      - Custom Merlin Device: "custom-device-legacy.md"
 
 theme:
   name: material
@@ -113,4 +123,5 @@ plugins:
   - swagger-ui-tag
   - git-revision-date-localized:
       enable_creation_date: true
+      # enable_git_follow: false
       type: timeago
