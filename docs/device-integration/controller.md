@@ -29,6 +29,32 @@ await self.dependencies.output.controller_did_connect_device(self, device_id)
 await self.dependencies.output.controller_did_receive_device_events(self, events)
 ```
 
+### `last_error`
+
+Both `Discovery` and `Device` carry a `last_error: str | None` field. **The integration owns this field entirely** — the Hub only stores and exposes it.
+
+| Situation | Action |
+|---|---|
+| Connection attempt fails | Set `last_error` to a human-readable message and call the appropriate output method (`controller_did_receive_discovery`, `controller_did_update_discovery`, etc.) |
+| Device fetch or command fails | Set `discovery.last_error` / `device.last_error` accordingly |
+| Error is resolved | Set `last_error = None` explicitly — the Hub never clears it automatically |
+
+```python
+# On failure — surface the error to the user
+discovery.last_error = "Connection timed out"
+await self.dependencies.output.controller_did_update_discovery(self, discovery)
+
+# On recovery — clear it explicitly
+discovery.last_error = None
+await self.dependencies.output.controller_did_update_discovery(self, discovery)
+```
+
+`Device.last_error` is persisted in the database, so stale errors survive restarts. Make sure to clear it whenever your integration successfully recovers, otherwise the error remains visible until explicitly resolved.
+
+The natural places to clear it depend on the error kind — for connection errors, clear on successful connection or successful fetch; for discovery errors, clear when the device re-appears or its advertisement updates successfully. In general: wherever you can confirm the condition that caused the error no longer holds, that's where the `None` assignment belongs.
+
+`last_error` is not limited to connection failures — use it for any condition worth surfacing to the user: authentication failures, unsupported firmware versions, misconfiguration, rate limiting, or any other integration-level problem. If the user should see it, put it here.
+
 ### The `discoveries` property
 
 Return your current in-memory cache of unpaired, visible devices. The Hub polls this — do not trigger scanning here.

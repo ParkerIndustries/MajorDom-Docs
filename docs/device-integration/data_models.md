@@ -31,6 +31,7 @@ class Discovery(Base):
     device_name: NonEmptyStr
     device_category: str | None
     device_icon: str | None
+    last_error: str | None = None  # set by the integration on failure, cleared (None) on recovery
 ```
 
 ## Device
@@ -48,6 +49,7 @@ class DeviceInfo(DevicePatch):
     manufacturer: str | None
     last_seen: datetime | None = None
     available: bool = False
+    last_error: str | None = None  # persisted; set by the integration on failure, cleared (None) on recovery
     main_parameter: UUID | None = None  # for the tap action on the room view, toggle in most cases
 
 class Device(DeviceInfo):
