@@ -1,5 +1,9 @@
 # MajorDom Device Integration Guide
 
+!!! warning
+    MajorDom is still under development.  
+    The integration structure is now stable, but implementation details are still subject to change.
+
 An **integration** is a module that bridges MajorDom Hub with IoT devices of a specific protocol or vendor (e.g. HomeKit, Zigbee, Z-Wave).
 
 ---
