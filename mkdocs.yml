@@ -17,6 +17,7 @@ nav:
           - Zeroconf / mDNS: "device-integration/discovery/zeroconf.md"
           - SSDP / UPnP: "device-integration/discovery/ssdp.md"
           - BLE: "device-integration/discovery/ble.md"
+      - Example Integration: "device-integration/example-integration.md"
   - API:
       - Hub API: "api/hub.md"
       - Bridge API: "api/bridge.md"
@@ -136,6 +137,7 @@ plugins:
           - device-integration/controller.md
           - device-integration/storing_data.md
           - device-integration/data_models.md
+          - device-integration/example-integration.md
           - device-integration/discovery/*.md
         API:
           - api/hub.md

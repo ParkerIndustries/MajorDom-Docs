@@ -124,3 +124,4 @@ param_id = self.parameter_uuid(device_id, f"{accessory_id}.{characteristic_id}")
 
 - [Storing Data](storing_data.md) — `integration_data`, typed schemas, file storage, and the device repository
 - [Data Models Reference](data_models.md) — `Discovery`, `Device`, `Parameter`, and related types
+- [Example Integration](example-integration.md) — a full pseudo-code controller putting all of the above together, to copy as a starting point

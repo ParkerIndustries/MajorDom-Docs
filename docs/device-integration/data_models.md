@@ -19,11 +19,15 @@ class CredentialsType(str, Enum):
 
 type CredentialsValue = str
 
+class ProvidedCredentials(Base):
+    type: CredentialsType
+    value: CredentialsValue | None = None
+
 class Discovery(Base):
     # technical
     id: UUID
     integration: NonEmptyStr
-    credentials: CredentialsType
+    expected_credentials_options: list[CredentialsType]
     expiration: datetime | None = None
     # for UX
     transport: NonEmptyStr
@@ -33,6 +37,17 @@ class Discovery(Base):
     device_icon: str | None
     last_error: str | None = None  # set by the integration on failure, cleared (None) on recovery
 ```
+
+A discovery advertises every credentials type it can actually be paired with —
+`expected_credentials_options` — since a device can support more than one simultaneously
+(e.g. a Matter device with both a QR code and a manual pairing code). List every option the
+device supports, in the order you'd like the app to prefer them.
+
+Pairing requests then send back `ProvidedCredentials`, pairing the actual value with which
+type it is, instead of a bare string. **Your `pair_device()` must validate
+`credentials.type` is one of `discovery.expected_credentials_options` before using it** —
+don't trust `discovery.credentials` from whatever your own discovery-time heuristic
+guessed; validate against what the caller explicitly asserts.
 
 ## Device
 

@@ -52,7 +52,7 @@ services/controller/myintegration/
 - [ ] Discovery services registered via `self.dependencies.zeroconf_discovery_service`, `ssdp_discovery_service`, and/or `ble_discovery_service` as appropriate; cancel closures saved and called in `stop`
 - [ ] Discovery of devices already paired to the Hub on reconnect, e.g. after a reboot (`self.dependencies.output.controller_did_connect_device` is called)
 - [ ] `start_pairing_window` is implemented if the protocol requires an explicit scan mode
-- [ ] Device pairing (`pair_device` is implemented)
+- [ ] Device pairing (`pair_device` is implemented, and validates the incoming `ProvidedCredentials.type` against `discovery.expected_credentials_options` before using it)
 - [ ] Device schema is properly mapped: device info, parameter list, and each parameter's metadata are translated to MajorDom's domain model
 - [ ] Hub → Device control (`send_command` is implemented)
 - [ ] Device → Hub event subscription (`self.dependencies.output.controller_did_receive_device_events` is called on incoming events)
@@ -60,7 +60,7 @@ services/controller/myintegration/
 - [ ] Paired devices going offline/coming back online *while the Hub is running* (not just on reboot) — set `device.available` accordingly, and clear/set `last_error` to match
 - [ ] Graceful shutdown in `stop`
 
-See [Implementing a Controller](controller.md) for details.
+See [Implementing a Controller](controller.md) for details, or [Example Integration](example-integration.md) for a full pseudo-code controller to copy as a starting point.
 
 ## Testing
 
