@@ -100,10 +100,11 @@ class ParameterRole(StrEnum):
     control = 'control' # read-write
     event = 'event'     # fire-and-forget
 
+
 class ParameterVisibility(StrEnum):
     user = "user"  # main, everyday interaction, device screen widgets (on/off, brightness, volume)
-    setting = "setting"  # user-configurable, initial setup or low-frequency, like "auto off timer"
-    system = "system"  # firmware, diagnostics, internals; not visible
+    setting = "setting"  # user-configurable but behind am extra "settings"/"advanced" tap: configured once and rarely touched again; or diagnostic readings (RSSI, firmware version)
+    system = "system"  # hidden under-the-hood wirings; not visible to the user
 
 class Parameter(UUIdentifable):
     id: UUID
@@ -117,8 +118,35 @@ class Parameter(UUIdentifable):
     min_step: int | float | None = None
     valid_values: dict[int | float | str, str] | None = None  # value → display label
     fields: list["Parameter"] | None = None  # schema for data_type=struct
+    default_value: bytes | None = None
     integration_data: Any
+
+    @property
+    def can_be_main_parameter(self) -> bool:
+        return bool(
+            self.data_type in (ParameterDataType.bool, ParameterDataType.none)
+            or self.default_value is not None
+        )
 
 class ParameterState(Parameter):
     value: bytes
 ```
+
+### `main_parameter` and `default_value`
+
+`Device.main_parameter` points at the `Parameter` used for the quick tap-action on the
+room view (toggle in most cases — e.g. `OnOff` for a light, not `Brightness`). Not every
+parameter is a sensible tap target: `can_be_main_parameter` is `True` when a parameter is
+either inherently binary/actionless (`bool`/`none` data type, like a toggle or a button)
+or has a `default_value` set — a value to send when the parameter itself doesn't carry an
+obvious "activate" semantic (e.g. a `Thermostat.SetpointRaiseLower` command needs some
+concrete `mode`/`amount` to be a usable one-tap action). Set `default_value` on the
+`ParameterState` you pick as `main_parameter` whenever its own `data_type` isn't
+`bool`/`none` — otherwise the Hub would have nothing to send when the user taps it.
+
+### Commands with arguments
+
+Some integrations (e.g. Matter) expose commands that take a list of arguments — for those, the
+command itself is modeled as a `Parameter` and each of its arguments as a nested
+`Parameter` in `fields`: **command = parameter, argument = sub-parameter**. This is a
+convention on top of the generic schema, not a separate concept. If your integration's commands don't take structured arguments, you leave `fields` unset.

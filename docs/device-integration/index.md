@@ -53,9 +53,16 @@ services/controller/myintegration/
 - [ ] Hub → Device control (`send_command` is implemented)
 - [ ] Device → Hub event subscription (`self.dependencies.output.controller_did_receive_device_events` is called on incoming events)
 - [ ] `identify`, `unpair`, and `fetch` are implemented
+- [ ] Paired devices going offline/coming back online *while the Hub is running* (not just on reboot) — set `device.available` accordingly, and clear/set `last_error` to match
 - [ ] Graceful shutdown in `stop`
 
 See [Implementing a Controller](controller.md) for details.
+
+## Testing
+
+Integrations run their tests against a virtual/simulated
+device where possible (see Matter's virtual device fixtures under
+`tests/test_controllers/test_matter/`), so CI doesn't need physical hardware. 
 
 ## Notes
 

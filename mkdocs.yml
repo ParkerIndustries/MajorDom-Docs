@@ -125,3 +125,19 @@ plugins:
       enable_creation_date: true
       # enable_git_follow: false
       type: timeago
+  - llmstxt:
+      markdown_description: |
+        MajorDom is a self-hosted smart-home hub. This documentation covers building device
+        integrations (Matter, Zigbee, HomeKit, etc.) and the Hub/Bridge/Cloud HTTP/WebSocket APIs.
+      full_output: llms-full.txt
+      sections:
+        Device Integration:
+          - device-integration/index.md
+          - device-integration/controller.md
+          - device-integration/storing_data.md
+          - device-integration/data_models.md
+          - device-integration/discovery/*.md
+        API:
+          - api/hub.md
+          - api/bridge.md
+          - api/cloud.md
