@@ -16,6 +16,11 @@ If this is your first integration, don't worry about understanding every line th
 through. Scaffold from the template, rename `Acme` to your protocol, and start replacing the
 `# pseudo` bits with calls into your actual device library one at a time.
 
+!!! tip "More examples"
+    This page is a *pedagogical* walkthrough. For real, production integrations to learn from —
+    HomeKit, Zigbee, Matter, and more — browse the official MajorDom integrations at
+    [github.com/orgs/MajorDom-Systems/repositories?q=integration-](https://github.com/orgs/MajorDom-Systems/repositories?q=integration-).
+
 ## Module Layout
 
 Your integration is a standalone package (`majordom_<protocol>/`), scaffolded from the template:
