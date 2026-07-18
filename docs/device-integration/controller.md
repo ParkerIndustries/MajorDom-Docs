@@ -2,15 +2,35 @@
 
 ## AbstractController Overview
 
-Create a directory under `services/controller/` for your integration and subclass [`AbstractController`](https://github.com/ParkerIndustries/MajorDom-Hub/tree/develop/majordom_hub/services/controller/framework/abstract_controller.py).
+Your integration's controller subclasses [`AbstractController`](https://github.com/MajorDom-Systems/integration-sdk/tree/master/majordom_integration_sdk/controller/abstract_controller.py) from the SDK. It is generic over your `Device` and `Parameter` subclasses:
+
+```python
+from majordom_integration_sdk.controller import AbstractController
+from majordom_integration_sdk.schemas import Device, Parameter
+
+class MyController(AbstractController[Device, Parameter]):
+    name = "My Protocol"
+    ...
+```
+
+### The `name` and `slug()` identity
+
+Declare `name` as a **class attribute** (not a property):
+
+```python
+class MyController(AbstractController[Device, Parameter]):
+    name = "Hue"
+```
+
+The Hub reads `name` — and the derived `slug()` (a `@final` classmethod returning the URL-safe slug, e.g. `"hue"`) — off the *class*, before it ever constructs the controller, to wire that integration's documents folder and scoped repository. Because of that, `name` must be a class attribute; the SDK raises a `TypeError` pointing here if it's missing. Read `name_slug`/`slug()` anywhere you need the stable identifier.
 
 ### Hub → Device
 
-Implement all abstract methods defined in [`AbstractController`](https://github.com/ParkerIndustries/MajorDom-Hub/tree/develop/majordom_hub/services/controller/framework/abstract_controller.py). The Hub calls these to drive your integration.
+Implement all abstract methods defined in [`AbstractController`](https://github.com/MajorDom-Systems/integration-sdk/tree/master/majordom_integration_sdk/controller/abstract_controller.py) — `start`, `stop`, `pair_device`, `unpair`, `identify`, `fetch`, `send_command`, and the `discoveries` property. The Hub calls these to drive your integration.
 
 ### Device → Hub
 
-Use `self.dependencies.output` ([`ControllerOutput`](https://github.com/ParkerIndustries/MajorDom-Hub/tree/develop/majordom_hub/services/controller/framework/abstract_controller.py)), injected by the Hub:
+Use `self.dependencies.output` (a `ControllerOutput`), injected by the Hub:
 
 ```python
 # New unpaired device found during discovery
@@ -26,7 +46,7 @@ await self.dependencies.output.controller_did_lose_discovery(self, discovery_id)
 await self.dependencies.output.controller_did_connect_device(self, device_id)
 
 # Device reported new parameter values or events
-await self.dependencies.output.controller_did_receive_device_events(self, events)
+await self.dependencies.output.controller_did_receive_events(self, events)
 ```
 
 ### `last_error`
@@ -73,7 +93,7 @@ Optional. Override only if your protocol requires an explicit short-lived scan m
 
 ## Injected Dependencies
 
-The Hub populates `self.dependencies` (see [`AbstractController.Dependencies`](https://github.com/ParkerIndustries/MajorDom-Hub/tree/develop/majordom_hub/services/controller/framework/abstract_controller.py)) before calling `start()`.
+The Hub populates `self.dependencies` (see [`AbstractController.Dependencies`](https://github.com/MajorDom-Systems/integration-sdk/tree/master/majordom_integration_sdk/controller/abstract_controller.py)) before calling `start()`.
 
 | Field | Type | Description |
 |---|---|---|

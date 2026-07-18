@@ -84,6 +84,7 @@ class ParameterDataType(StrEnum):
     decimal = "decimal"  # python float
     enum = "enum"        # integer with string representation
     string = "string"
+    struct = "struct"    # multi-field object (e.g. command arguments); see "Commands with arguments"
     data = "data"        # binary data, base64 encoded at high level
 
 class ParameterUnit(StrEnum):

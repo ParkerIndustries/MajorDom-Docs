@@ -7,10 +7,10 @@ MajorDom's Device and Parameter schemas expose an `integration_data` field for s
 Integrations can subclass Device/DeviceState and Parameter/ParameterState to declare a typed schema for that field — Hub will then handle (de-)serialization automatically before passing Device instance to Controller's methods or when saving to the database.
 
 ```python
-# myintegration/models.py
-from majordom_hub.schemas.base import Base
-from majordom_hub.schemas.device import Device, DeviceState
-from majordom_hub.schemas.parameter import Parameter, ParameterState
+# majordom_myintegration/models.py
+from majordom_integration_sdk.schemas.base import Base
+from majordom_integration_sdk.schemas.device import Device, DeviceState
+from majordom_integration_sdk.schemas.parameter import Parameter, ParameterState
 
 class MyDeviceIntegrationData(Base):
     pairing_token: str | None = None
