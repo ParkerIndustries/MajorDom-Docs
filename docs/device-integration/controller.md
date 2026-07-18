@@ -1,5 +1,12 @@
 # Implementing a Controller
 
+!!! tip "Start from the template"
+    Scaffold your integration from the
+    [`integration-template`](https://github.com/MajorDom-Systems/integration-template)
+    (**Use this template → Create a new repository**), and read the
+    [Example Integration](example-integration.md) walkthrough alongside this page — it puts every
+    piece below together in one worked controller.
+
 ## AbstractController Overview
 
 Your integration's controller subclasses [`AbstractController`](https://github.com/MajorDom-Systems/integration-sdk/tree/master/majordom_integration_sdk/controller/abstract_controller.py) from the SDK. It is generic over your `Device` and `Parameter` subclasses:
@@ -9,7 +16,7 @@ from majordom_integration_sdk.controller import AbstractController
 from majordom_integration_sdk.schemas import Device, Parameter
 
 class MyController(AbstractController[Device, Parameter]):
-    name = "My Protocol"
+    name = "My Protocol"  # optional — auto-derived from the class name ("My") otherwise
     ...
 ```
 
@@ -142,6 +149,7 @@ param_id = self.parameter_uuid(device_id, f"{accessory_id}.{characteristic_id}")
 
 ## See Also
 
+- [`integration-template`](https://github.com/MajorDom-Systems/integration-template) — scaffold your repo with **Use this template**, then fill in the controller
 - [Storing Data](storing_data.md) — `integration_data`, typed schemas, file storage, and the device repository
 - [Data Models Reference](data_models.md) — `Discovery`, `Device`, `Parameter`, and related types
 - [Example Integration](example-integration.md) — a full pseudo-code controller putting all of the above together, to copy as a starting point

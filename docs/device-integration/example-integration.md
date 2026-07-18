@@ -21,6 +21,41 @@ through. Scaffold from the template, rename `Acme` to your protocol, and start r
     HomeKit, Zigbee, Matter, and more — browse the official MajorDom integrations at
     [github.com/orgs/MajorDom-Systems/repositories?q=integration-](https://github.com/orgs/MajorDom-Systems/repositories?q=integration-).
 
+## The controller at a glance
+
+Before the details, here's the whole shape of a finished controller — every method you implement,
+in one place. Bodies are elided (`...`); the sections group them by direction of data flow. If
+you're new to OOP or SDKs, read this as the "table of contents" for the rest of the page.
+
+```python
+class MyController(AbstractController[MyDevice, MyParameter]):
+    name = "My Protocol"  # optional — auto-derived from the class name otherwise
+
+    # ── Lifecycle ────────────────────────────────────────────────────────────
+    async def start(self) -> None: ...   # connect, start discovery, restore already-paired devices
+    async def stop(self)  -> None: ...   # cancel tasks, stop discovery, close connections
+
+    # ── Discovery  (Device → Hub) ────────────────────────────────────────────
+    @property
+    def discoveries(self) -> dict[UUID, Discovery]: ...   # cached snapshot of unpaired devices
+    #   when a device appears, call:
+    #     await self.dependencies.output.controller_did_receive_discovery(self, discovery)
+
+    # ── Pairing ──────────────────────────────────────────────────────────────
+    async def start_pairing_window(self, duration_sec: int) -> None: ...  # optional (e.g. Zigbee)
+    async def pair_device(self, discovery, credentials) -> UUID: ...       # commission + map schema
+    async def unpair(self, device: MyDevice) -> None: ...
+
+    # ── Control & read  (Hub → Device) ───────────────────────────────────────
+    async def send_command(self, command, device, parameter) -> None: ...  # set a value / run command
+    async def fetch(self, device: MyDevice) -> None: ...                    # re-read all parameters
+    async def identify(self, device: MyDevice) -> None: ...                 # blink / beep the device
+
+    # ── Events  (Device → Hub) ───────────────────────────────────────────────
+    #   on an incoming device update, call:
+    #     await self.dependencies.output.controller_did_receive_events(self, [DeviceParameterChange(...)])
+```
+
 ## Module Layout
 
 Your integration is a standalone package (`majordom_<protocol>/`), scaffolded from the template:
