@@ -17,6 +17,7 @@ nav:
           - Zeroconf / mDNS: "device-integration/discovery/zeroconf.md"
           - SSDP / UPnP: "device-integration/discovery/ssdp.md"
           - BLE: "device-integration/discovery/ble.md"
+      - Standalone Mode: "device-integration/standalone.md"
       - Example Integration: "device-integration/example-integration.md"
   - API:
       - Hub API: "api/hub.md"
