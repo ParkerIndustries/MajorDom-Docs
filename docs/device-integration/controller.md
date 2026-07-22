@@ -54,6 +54,12 @@ await self.dependencies.output.controller_did_connect_device(self, device_id)
 
 # Device reported new parameter values or events
 await self.dependencies.output.controller_did_receive_events(self, events)
+
+# A user-facing problem — a CTA, or (still_running=False) a failure that leaves the
+# integration inactive. Plain language for the user; technical detail goes to the logs.
+await self.dependencies.output.controller_did_encounter_error(
+    self, "The Zigbee stick is unplugged — re-plug it and restart the integration", still_running=False
+)
 ```
 
 ### `last_error`
@@ -81,6 +87,52 @@ await self.dependencies.output.controller_did_update_discovery(self, discovery)
 The natural places to clear it depend on the error kind — for connection errors, clear on successful connection or successful fetch; for discovery errors, clear when the device re-appears or its advertisement updates successfully. In general: wherever you can confirm the condition that caused the error no longer holds, that's where the `None` assignment belongs.
 
 `last_error` is not limited to connection failures — use it for any condition worth surfacing to the user: authentication failures, unsupported firmware versions, misconfiguration, rate limiting, or any other integration-level problem. If the user should see it, put it here.
+
+### `controller_did_encounter_error`
+
+`last_error` is *persistent per-device/discovery state* — a flag on one device that stays until you clear it. `controller_did_encounter_error` is complementary: a **one-off, user-facing notification**, and the way to report a **controller-level** problem that isn't tied to a single device.
+
+```python
+async def controller_did_encounter_error(
+    self, message: str, still_running: bool,
+): ...
+```
+
+- **`message`** — plain language for the user, never a traceback. Put technical detail in the logs; put here only what the user should see, and fold any call-to-action right into the text.
+- **`still_running`** — `False` when the controller can no longer run. The Hub marks the integration **inactive** and tells the user it failed (and what to do, if actionable) — no technical dump. Use `True` for a problem you've handled and recovered from but still want the user to know about (e.g. a user-fixable misconfiguration).
+
+#### Which one do I use?
+
+There are three places an error can go. Pick by asking who it's for and how long it should stay:
+
+| Surface | Use it for | How long it lives |
+|---|---|---|
+| `Device.last_error` / `Discovery.last_error` | a problem with one device | stays until *you* clear it |
+| `controller_did_encounter_error` | the whole integration has a problem; `still_running=False` = it failed and stopped | one-off notification |
+| logs (`logger.*`) | technical detail, for you the developer | log retention |
+
+**What about a parameter failing?** Parameters don't have an error field, on purpose. If one
+parameter fails (a rejected command, an unreadable value), tell the user at the *device* level
+and name the parameter in the message: `device.last_error = "Brightness could not be set — the
+device rejected the command"`. Status codes and tracebacks go to the logs.
+
+Two habits:
+
+- **User surfaces get plain language** — never a traceback or a protocol code.
+- **One incident usually goes to two places**: a detailed log line for you, plus one user-facing
+  surface. Logs-only is fine only when the user can't see or fix anything.
+
+```python
+# Recoverable, but the user must act:
+await self.dependencies.output.controller_did_encounter_error(
+    self, "Matter server unreachable — check that the matter-server add-on is running", still_running=True
+)
+
+# Fatal — the integration can't continue:
+await self.dependencies.output.controller_did_encounter_error(
+    self, "The Zigbee coordinator is not responding and the integration has stopped.", still_running=False
+)
+```
 
 ### The `discoveries` property
 

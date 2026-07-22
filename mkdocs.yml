@@ -12,7 +12,7 @@ nav:
       - Implementing a Controller: "device-integration/controller.md"
       - Storing Data: "device-integration/storing_data.md"
       - Data Models: "device-integration/data_models.md"
-      - Parameter Visibility & UX: "device-integration/parameter-visibility.md"
+      - Parameter UX: "device-integration/parameter-ux.md"
       - Discovery Services:
           - Overview: "device-integration/discovery/index.md"
           - Zeroconf / mDNS: "device-integration/discovery/zeroconf.md"
@@ -20,6 +20,7 @@ nav:
           - BLE: "device-integration/discovery/ble.md"
       - Standalone Mode: "device-integration/standalone.md"
       - Example Integration: "device-integration/example-integration.md"
+      - Quality Checklist: "device-integration/quality.md"
   - API:
       - Hub API: "api/hub.md"
       - Bridge API: "api/bridge.md"
