@@ -19,6 +19,7 @@ nav:
           - BLE: "device-integration/discovery/ble.md"
       - Standalone Mode: "device-integration/standalone.md"
       - Example Integration: "device-integration/example-integration.md"
+      - Quality Checklist: "device-integration/quality.md"
   - API:
       - Hub API: "api/hub.md"
       - Bridge API: "api/bridge.md"
