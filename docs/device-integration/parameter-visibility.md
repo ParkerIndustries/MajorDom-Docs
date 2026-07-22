@@ -51,12 +51,44 @@ Both `matter_spec.py` and `zigbee_spec.py` carry the curation as plain sets keye
 | `EVERYDAY_CONTROL_ATTRIBUTES` | writable attrs promoted to **user** (+ forced `control` role) |
 | `SENSITIVE_*` | never-user security material → **system** |
 | `METADATA_ATTRIBUTES` / `is_metadata_attribute()` | scaling/bounds → **system** + metadata source |
+| `METADATA_SOURCES` / `resolve_metadata_bounds()` | maps a shown param → its sibling min/max limit attrs (priority-1 bounds) |
 | `CONFIG_HEAVY_CLUSTERS` (zigbee) | clusters where "reportable" is a poor user signal (e.g. DoorLock) |
-| `MAIN_PARAMETER_BY_CLUSTER` | which command/attr is the one-tap `main_parameter`, in priority order |
+| `MAIN_PARAMETER_BY_CLUSTER` | which command/attr is the one-tap `main_parameter`, in priority order (see [The one-tap main parameter](#the-one-tap-main-parameter)) |
 
 Add an entry, re-run the audit (below), done. Prefer **explicit curation over heuristics** — the
 name heuristics (`*_divisor`, `min_measured_value`, …) are a *fallback* for the long tail and for
 quirks we haven't seen yet.
+
+## The one-tap main parameter
+
+`Device.main_parameter` is the single action behind the room-tile tap. A parameter is eligible when
+`Parameter.can_be_main_parameter` holds — it's a **stateless action**: a `bool`/`none` toggle-or-button,
+a parameter with a `default_value` ("set to this value" shortcut), or an **`enum` with `valid_values`**
+(a cycle). Both integrations can point a main at either a **command** (Matter/Zigbee) or an
+**attribute** (e.g. Zigbee `FanControl.fan_mode`, which has no command) — `MAIN_PARAMETER_BY_CLUSTER`
+records which, in priority order.
+
+### Enum mains cycle — `default_value` has three readings
+
+For an `enum` main, each tap advances to the next value via the SDK helper
+`next_main_parameter_value(current, cycle)`. What `cycle` is depends on how `default_value` is set:
+
+| `default_value` | Cycle | Behaviour |
+|---|---|---|
+| a single value (the normal value encoding) | `[that value]` | **button** — every tap sets that one value (stateless shortcut) |
+| a `valid_values`-shaped subset, ordered by key | those keys | **toggle / rotor** — cycles through the subset; keep it to `[off, on]` (or `[off, fav]`) so it reads as a toggle, though more values are allowed |
+| `None` | the parameter's full `valid_values` | cycles through **every** valid value — as if `default_value == valid_values` |
+
+The cycle is ordered **by key number** (0, 1, 2, …), so `off`(0) → `on`(4) → wraps. `next_main_parameter_value`
+returns the first element when the current value is unknown or off-cycle, so a device that reports a
+surprise mode still recovers to a sane state on the next tap.
+
+**Under the hood.** Zigbee stores the curated subset on the parameter's integration data
+(`ZBParameterIntegrationData.main_cycle`); `send_command` reads the cached attribute value and computes
+the next one when a command arrives **with no value** (the main-tap case). If a command needs more than
+the parameter's own value can carry, integrations stash the raw defaults on the parameter
+(`default_arguments`, mirroring Matter) and send those. When a value *is* supplied, it's used verbatim —
+cycling is only the value-less fast path.
 
 ## Metadata priority
 
