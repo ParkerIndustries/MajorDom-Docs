@@ -12,6 +12,7 @@ nav:
       - Implementing a Controller: "device-integration/controller.md"
       - Storing Data: "device-integration/storing_data.md"
       - Data Models: "device-integration/data_models.md"
+      - Parameter UX: "device-integration/parameter-ux.md"
       - Discovery Services:
           - Overview: "device-integration/discovery/index.md"
           - Zeroconf / mDNS: "device-integration/discovery/zeroconf.md"

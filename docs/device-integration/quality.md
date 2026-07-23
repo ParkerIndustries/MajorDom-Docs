@@ -53,4 +53,4 @@ The reliability rules above hinge on one habit: **catch errors at the edges and 
 - Never let an exception cross into a `self.dependencies.output.*` call — the Hub treats those callbacks as trusted and an exception there can disrupt Hub-side handling.
 - Log an expected failure once at the appropriate level; don't re-log the same condition every poll.
 
-For controller-level problems that aren't tied to a single device (e.g. the backend/radio went away entirely), surfacing them to the user is on the roadmap via a dedicated output hook — until then, log clearly and reflect it on the affected devices.
+For controller-level problems that aren't tied to a single device (e.g. the backend/radio went away entirely), call `controller_did_encounter_error` — it surfaces a plain-language message to the user, and `still_running=False` marks the whole integration as failed. See [Reporting errors to the user](controller.md#controller_did_encounter_error).

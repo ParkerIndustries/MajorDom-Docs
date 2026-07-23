@@ -142,6 +142,7 @@ class Parameter(UUIdentifable):
         return bool(
             self.data_type in (ParameterDataType.bool, ParameterDataType.none)
             or self.default_value is not None
+            or self.valid_values
         )
 
 class ParameterState(Parameter):
@@ -152,13 +153,20 @@ class ParameterState(Parameter):
 
 `Device.main_parameter` points at the `Parameter` used for the quick tap-action on the
 room view (toggle in most cases — e.g. `OnOff` for a light, not `Brightness`). Not every
-parameter is a sensible tap target: `can_be_main_parameter` is `True` when a parameter is
-either inherently binary/actionless (`bool`/`none` data type, like a toggle or a button)
-or has a `default_value` set — a value to send when the parameter itself doesn't carry an
-obvious "activate" semantic (e.g. a `Thermostat.SetpointRaiseLower` command needs some
-concrete `mode`/`amount` to be a usable one-tap action). Set `default_value` on the
-`ParameterState` you pick as `main_parameter` whenever its own `data_type` isn't
-`bool`/`none` — otherwise the Hub would have nothing to send when the user taps it.
+parameter is a sensible tap target — `can_be_main_parameter` is `True` when the tap can do
+something meaningful:
+
+- **`none`** — a button (an argument-less command like `Toggle`);
+- **`bool`** — a toggle (each tap flips it);
+- **`enum` with `valid_values` defined** — a cycle (each tap moves to the next value);
+- **`default_value` set** — for any type: one value makes a "send this value" button
+  (e.g. a `Thermostat.SetpointRaiseLower` command needs a concrete `mode`/`amount` to be
+  tappable); a set of values makes a **cycle** — most often a two-value toggle like brightness
+  `{0, 80}`, but it can be longer. `with_default_value(...)` takes either and always stores a
+  set (one value = a 1-element set).
+
+How each of these behaves on tap — and how to pick good visibility for every parameter — is
+covered in [Parameter UX](parameter-ux.md).
 
 ### Commands with arguments
 

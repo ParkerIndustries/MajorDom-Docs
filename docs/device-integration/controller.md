@@ -94,15 +94,33 @@ The natural places to clear it depend on the error kind — for connection error
 
 ```python
 async def controller_did_encounter_error(
-    self, message: str, still_running: bool, device_id: UUID | None = None,
+    self, message: str, still_running: bool,
 ): ...
 ```
 
 - **`message`** — plain language for the user, never a traceback. Put technical detail in the logs; put here only what the user should see, and fold any call-to-action right into the text.
 - **`still_running`** — `False` when the controller can no longer run. The Hub marks the integration **inactive** and tells the user it failed (and what to do, if actionable) — no technical dump. Use `True` for a problem you've handled and recovered from but still want the user to know about (e.g. a user-fixable misconfiguration).
-- **`device_id`** — set it to scope the problem to one device; leave it `None` for a controller-wide problem. When set, the Hub also records the message as that device's `last_error`.
 
-**When to use which:** if it's ongoing state of one device, set `last_error`. If it's a user notice/CTA, or the whole integration failed, call `controller_did_encounter_error`. Neither is for developer diagnostics — those go to the logs.
+#### Which one do I use?
+
+There are three places an error can go. Pick by asking who it's for and how long it should stay:
+
+| Surface | Use it for | How long it lives |
+|---|---|---|
+| `Device.last_error` / `Discovery.last_error` | a problem with one device | stays until *you* clear it |
+| `controller_did_encounter_error` | the whole integration has a problem; `still_running=False` = it failed and stopped | one-off notification |
+| logs (`logger.*`) | technical detail, for you the developer | log retention |
+
+**What about a parameter failing?** Parameters don't have an error field, on purpose. If one
+parameter fails (a rejected command, an unreadable value), tell the user at the *device* level
+and name the parameter in the message: `device.last_error = "Brightness could not be set — the
+device rejected the command"`. Status codes and tracebacks go to the logs.
+
+Two habits:
+
+- **User surfaces get plain language** — never a traceback or a protocol code.
+- **One incident usually goes to two places**: a detailed log line for you, plus one user-facing
+  surface. Logs-only is fine only when the user can't see or fix anything.
 
 ```python
 # Recoverable, but the user must act:
