@@ -1,0 +1,95 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+# Deployment of the site itself is handled by publish.yml (mkdocs gh-deploy).
+# This workflow only cuts a version tag and a GitHub Release whose notes list the
+# changed documentation pages and the commits since the previous release.
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Version bump
+        id: version
+        run: |
+          # Bump the patch version only if the current version already has a tag,
+          # so a plain docs edit that forgot to bump still gets a fresh release.
+          if [[ "v$(poetry version --short)" == "$(git describe --tags --always --abbrev=0)" ]]; then
+            poetry version patch
+            git add pyproject.toml
+            git config --global user.email "34688010+MarkParker5@users.noreply.github.com"
+            git config --global user.name "MarkParker5"
+            git commit -m "Version bump v$(poetry version --short)"
+            git push
+            echo "Version bumped to $(poetry version --short)"
+          fi
+          echo "Using version $(poetry version --short)"
+          echo "VERSION=v$(poetry version --short)" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ steps.version.outputs.VERSION }}
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 "${{ steps.version.outputs.VERSION }}^" 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          RANGE="${PREV_TAG}..${{ steps.version.outputs.VERSION }}"
+
+          COMMITS=$(git log --pretty=format:"- %s" "$RANGE")
+
+          # docs/**/*.md pages, linked to the live site (mkdocs directory URLs: strip .md / index).
+          fmt_pages() {
+            git diff --diff-filter="$1" --name-only "$RANGE" -- 'docs/*.md' 'docs/**/*.md' \
+              | sed 's|^docs/||; s|/index\.md$|/|; s|\.md$|/|' \
+              | while read -r p; do echo "- [${p}](https://docs.majordom.io/${p})"; done
+          }
+          NEW_DOCS=$(fmt_pages A)
+          CHANGED_DOCS=$(fmt_pages M)
+
+          {
+            echo "BODY<<EOF"
+            if [ -n "$NEW_DOCS" ]; then
+              echo "## New Documentation"
+              echo "$NEW_DOCS"
+              echo ""
+            fi
+            if [ -n "$CHANGED_DOCS" ]; then
+              echo "## Updated Documentation"
+              echo "$CHANGED_DOCS"
+              echo ""
+            fi
+            echo "## Changes"
+            echo "$COMMITS"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.BODY }}
+          draft: false
+          prerelease: false
