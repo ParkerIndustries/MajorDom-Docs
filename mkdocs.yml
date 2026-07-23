@@ -1,5 +1,10 @@
 site_name: MajorDom Docs
 site_url: https://docs.majordom.io
+
+# Fold the example-integration full-source dumps (docs/llms/*.txt, built by scripts/build_llms.py)
+# into llms.txt / llms-full.txt after mkdocs-llmstxt runs.
+hooks:
+  - majordom_docs/llms_hook.py
 site_author: Mark Parker
 site_description: MajorDom documentation
 

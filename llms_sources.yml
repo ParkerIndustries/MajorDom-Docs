@@ -1,0 +1,26 @@
+# Repos whose full source is published as unindexed `/llms/<name>.txt` endpoints — linked from
+# llms.txt and concatenated into llms-full.txt so an AI can load a whole integration to write a
+# better one. Regenerated weekly by .github/workflows/llms-refresh.yml (or `python scripts/build_llms.py`).
+#
+# Edit this list to add/remove sources. `branch` defaults to master (the released source).
+integrations:
+  - name: integration-sdk
+    title: Integration SDK
+    repo: https://github.com/MajorDom-Systems/integration-sdk
+    branch: master
+  - name: integration-template
+    title: Integration template (scaffold)
+    repo: https://github.com/MajorDom-Systems/integration-template
+    branch: master
+  - name: integration-matter
+    title: Matter integration (example)
+    repo: https://github.com/MajorDom-Systems/integration-matter
+    branch: master
+  - name: integration-zigbee
+    title: Zigbee integration (example)
+    repo: https://github.com/MajorDom-Systems/integration-zigbee
+    branch: master
+  - name: integration-homekit
+    title: HomeKit integration (example)
+    repo: https://github.com/MajorDom-Systems/integration-homekit
+    branch: master
