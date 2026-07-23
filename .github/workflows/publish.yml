@@ -4,6 +4,7 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch: # lets llms-refresh.yml redeploy when a source repo changes
 permissions:
   contents: write
 jobs:
@@ -23,4 +24,6 @@ jobs:
             mkdocs-material-
       - run: pip install poetry
       - run: poetry install
+      - name: Build integration source dumps (docs/llms/*.txt — not committed, built here)
+        run: poetry run python scripts/build_llms.py
       - run: poetry run mkdocs gh-deploy --force

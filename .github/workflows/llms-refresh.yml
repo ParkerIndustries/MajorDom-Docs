@@ -1,0 +1,27 @@
+name: Refresh integration llms sources
+
+# Weekly: if any repo in llms_sources.yml has advanced past what the live site's
+# /llms/manifest.json recorded, trigger publish.yml — which re-packs docs/llms/*.txt (build
+# artifacts, never committed) and redeploys. No clone or commit happens here.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write # to dispatch publish.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Redeploy the docs if any source repo changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/check_llms_sources.py

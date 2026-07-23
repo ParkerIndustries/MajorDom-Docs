@@ -54,9 +54,9 @@ parameter:
 
 | Main parameter | Tap behaviour |
 |---|---|
-| `none` (an argument-less command like Toggle) | **button** — fires the command |
 | `bool` | **toggle** — flips between on and off |
-| `enum` with `valid_values` defined | **cycle** — each tap moves to the next value, wrapping around |
+| `none` (an argument-less command like Toggle) | **button** — fires the command |
+| `valid_values` set — any data type, not just enum | **cycle** — each tap moves to the next value, wrapping around |
 | `default_value` = one value | **button** — every tap sends that same value |
 | `default_value` = a set of values | **cycle** through just those values — works for **any** data type |
 
