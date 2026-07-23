@@ -139,7 +139,7 @@ class Parameter(UUIdentifable):
 
     @property
     def can_be_main_parameter(self) -> bool:
-        return bool(
+        return self.visibility == ParameterVisibility.user and bool(
             self.data_type in (ParameterDataType.bool, ParameterDataType.none)
             or self.default_value is not None
             or self.valid_values
@@ -153,13 +153,14 @@ class ParameterState(Parameter):
 
 `Device.main_parameter` points at the `Parameter` used for the quick tap-action on the
 room view (toggle in most cases — e.g. `OnOff` for a light, not `Brightness`). Not every
-parameter is a sensible tap target — `can_be_main_parameter` is `True` when the tap can do
-something meaningful:
+parameter is a sensible tap target — `can_be_main_parameter` requires `user` visibility (the
+main action is the most exposed control of all) and is `True` when the tap can do something
+meaningful:
 
-- **`none`** — a button (an argument-less command like `Toggle`);
 - **`bool`** — a toggle (each tap flips it);
-- **`enum` with `valid_values` defined** — a cycle (each tap moves to the next value);
-- **`default_value` set** — for any type: one value makes a "send this value" button
+- **`none`** — a button (an argument-less command like `Toggle`);
+- **`valid_values` set** (any data type, not just enum) — a cycle (each tap moves to the next value);
+- **`default_value` set** — for any other type: one value makes a "send this value" button
   (e.g. a `Thermostat.SetpointRaiseLower` command needs a concrete `mode`/`amount` to be
   tappable); a set of values makes a **cycle** — most often a two-value toggle like brightness
   `{0, 80}`, but it can be longer. `with_default_value(...)` takes either and always stores a
