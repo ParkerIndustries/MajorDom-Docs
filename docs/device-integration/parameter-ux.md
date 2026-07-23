@@ -47,8 +47,10 @@ That way a new or odd parameter quietly stays hidden instead of cluttering the s
 ## The one-tap main parameter
 
 `Device.main_parameter` is what happens when the user taps the device's room tile.
-`Parameter.can_be_main_parameter` tells you which parameters qualify, and the tap behaves
-differently depending on the parameter:
+`Parameter.can_be_main_parameter` tells you which parameters qualify. A candidate must have
+**`user` visibility** — the main action is the most exposed control of all, so a settings or
+system parameter can never be it. Beyond that, the tap behaves differently depending on the
+parameter:
 
 | Main parameter | Tap behaviour |
 |---|---|
