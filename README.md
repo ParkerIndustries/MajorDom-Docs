@@ -1,4 +1,7 @@
-# MajorDom-Docs
+# MajorDom Docs
+
+Documentation for the MajorDom smart-home system, published at [docs.majordom.io](https://docs.majordom.io).
+Part of the [MajorDom-Systems](https://github.com/MajorDom-Systems) org.
 
 ## Development
 
