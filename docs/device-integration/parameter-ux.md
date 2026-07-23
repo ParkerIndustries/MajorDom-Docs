@@ -46,7 +46,12 @@ That way a new or odd parameter quietly stays hidden instead of cluttering the s
 
 ## The one-tap main parameter
 
-`Device.main_parameter` is what happens when the user taps the device's room tile.
+`Device.main_parameter` is the device's **quick action** — the single control invoked when the
+user taps the device's tile on the home screen or a widget *without* opening the device (its full
+parameter list), and what a programmatic "tap" triggers without having to fetch state and pick a
+parameter. Set it and the device gets a one-tap action from anywhere; leave it unset and the user
+has to open the device and choose a parameter to do anything.
+
 `Parameter.can_be_main_parameter` tells you which parameters qualify. A candidate must have
 **`user` visibility** — the main action is the most exposed control of all, so a settings or
 system parameter can never be it. Beyond that, the tap behaves differently depending on the
@@ -56,17 +61,18 @@ parameter:
 |---|---|
 | `bool` | **toggle** — flips between on and off |
 | `none` (an argument-less command like Toggle) | **button** — fires the command |
-| `valid_values` set — any data type, not just enum | **cycle** — each tap moves to the next value, wrapping around |
+| `enum` (has `valid_values`) | **cycle** — each tap advances through its values, wrapping around |
 | `default_value` = one value | **button** — every tap sends that same value |
-| `default_value` = a set of values | **cycle** through just those values — works for **any** data type |
+| `default_value` = two values | **toggle** — alternates between the two |
+| `default_value` = three or more values | **cycle** — advances through them, wrapping around |
 
 So a main parameter isn't limited to "do the same thing every time": a bool toggles, an enum
-steps through its states — and by setting `default_value` to a set of values you can add
-cycling to *any* parameter. Most of the time that's a two-value toggle (0 and some preferred
-value — e.g. brightness `{0, 80}` so a dimmer tile taps like an on/off switch), but the cycle
-can be longer. The same trick narrows an enum's cycle to a subset (just `{off, on}` for a fan).
-Set it with `with_default_value(...)` — it takes one value or a set, and always stores a set
-(one value is a 1-element set); labels for the values come from `valid_values`.
+steps through its states — and by setting `default_value` you can give *any* parameter a
+one-tap action. The number of values decides the behaviour — **one** = a button, **two** = a
+toggle, **three or more** = a cycle. Most of the time it's a two-value toggle (0 and some
+preferred value — e.g. brightness `{0, 80}` so a dimmer tile taps like an on/off switch). The
+same mechanism narrows an enum's cycle to a subset (just `{off, on}` for a fan) — set
+`default_value` to one value or a set; labels for the values come from `valid_values`.
 You don't compute any of this in your integration: when a tap produces a value-less command,
 **the Hub derives the value to send** (from the stored state, via `Parameter.main_cycle` +
 `next_main_parameter_value`) and hands your `send_command` a concrete value. Only a `none`-type

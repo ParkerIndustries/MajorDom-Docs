@@ -122,20 +122,24 @@ class ParameterVisibility(StrEnum):
     setting = "setting"  # user-configurable but behind am extra "settings"/"advanced" tap: configured once and rarely touched again; or diagnostic readings (RSSI, firmware version)
     system = "system"  # hidden under-the-hood wirings; not visible to the user
 
-class Parameter(UUIdentifable):
+# Generic over its value type V — value, valid_values keys, and default_value all share V
+# (an int parameter has int labels and an int default; a str parameter is str throughout).
+class Parameter[V](UUIdentifable):
     id: UUID
     name: str
+    description: str | None = None   # manufacturer-provided, read-only
+    note: str | None = None          # user-editable, MajorDom-side only
     data_type: ParameterDataType
     unit: ParameterUnit = ParameterUnit.plain
     role: ParameterRole
     visibility: ParameterVisibility
     min_value: int | float | None = None
     max_value: int | float | None = None
-    min_step: int | float | None = None
-    valid_values: dict[int | float | str, str] | None = None  # value → display label
-    fields: list["Parameter"] | None = None  # schema for data_type=struct
-    default_value: bytes | None = None
-    integration_data: Any
+    min_step: int | float | None = None       # smallest increment for a numeric parameter
+    valid_values: dict[V, str] | None = None  # allowed values → labels; for enums (numbers: use min/max/step)
+    fields: list["Parameter"] | None = None   # sub-parameters for data_type=struct (e.g. command args)
+    default_value: set[V] | V | None = None   # main-parameter tap value(s): one = button, a set = cycle
+    integration_data: Any                     # protocol-specific payload, opaque to the Hub
 
     @property
     def can_be_main_parameter(self) -> bool:
@@ -145,29 +149,25 @@ class Parameter(UUIdentifable):
             or self.valid_values
         )
 
-class ParameterState(Parameter):
-    value: bytes
+class ParameterState[V](Parameter[V]):
+    value: V | None = None   # pythonic value (int/bool/str/float/dict/...), not bytes
 ```
 
 ### `main_parameter` and `default_value`
 
-`Device.main_parameter` points at the `Parameter` used for the quick tap-action on the
-room view (toggle in most cases — e.g. `OnOff` for a light, not `Brightness`). Not every
-parameter is a sensible tap target — `can_be_main_parameter` requires `user` visibility (the
-main action is the most exposed control of all) and is `True` when the tap can do something
-meaningful:
+`Device.main_parameter` points at the one `Parameter` behind the room-tile tap (a toggle in
+most cases — e.g. `OnOff` for a light, not `Brightness`). A parameter is eligible
+(`can_be_main_parameter`) when it's `user`-visible and a tap does something meaningful: a `bool`
+or `none` command inherently, an `enum` through its `valid_values`, or — for any data type — a
+`default_value`.
 
-- **`bool`** — a toggle (each tap flips it);
-- **`none`** — a button (an argument-less command like `Toggle`);
-- **`valid_values` set** (any data type, not just enum) — a cycle (each tap moves to the next value);
-- **`default_value` set** — for any other type: one value makes a "send this value" button
-  (e.g. a `Thermostat.SetpointRaiseLower` command needs a concrete `mode`/`amount` to be
-  tappable); a set of values makes a **cycle** — most often a two-value toggle like brightness
-  `{0, 80}`, but it can be longer. `with_default_value(...)` takes either and always stores a
-  set (one value = a 1-element set).
+`default_value` is what makes an arbitrary parameter tappable (any data type) and curates what a
+tap sends — set it to one value for a button, or a set for a cycle (e.g. brightness `{0, 80}` so
+a dimmer taps like an on/off switch). It shares the parameter's value type `V`. (`valid_values`
+only *describes* a parameter's allowed values and their labels — it doesn't carry the tap value.)
 
-How each of these behaves on tap — and how to pick good visibility for every parameter — is
-covered in [Parameter UX](parameter-ux.md).
+See [Parameter UX](parameter-ux.md#the-one-tap-main-parameter) for how each case behaves on tap
+and how to pick the main parameter and good visibility.
 
 ### Commands with arguments
 

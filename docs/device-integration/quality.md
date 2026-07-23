@@ -2,7 +2,12 @@
 
 The [Implementation Checklist](index.md#implementation-checklist) gets your integration **functional** — it launches, pairs, controls, and reports. This checklist gets it **reliable and maintainable**: it's the bar an integration must clear before it's released.
 
-Items are ordered from **vital** (never ship without them) to **nice-to-have**. Like the implementation checklist, you can mirror this in your repo's README to track progress.
+Items are ordered from **vital** (never ship without them) to **nice-to-have**.
+
+!!! tip "Track it in your repo, not here"
+    The [integration template](https://github.com/MajorDom-Systems/integration-template#progress)
+    README ships **both checklists as a fillable copy** — tick items there as you implement them
+    and your CI goes green. This page is the reference that explains the *why* behind each item.
 
 ---
 

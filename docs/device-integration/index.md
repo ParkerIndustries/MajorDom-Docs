@@ -57,6 +57,10 @@ majordom_myintegration/
 
 ## Implementation Checklist
 
+Track it in your repo: the [integration template](https://github.com/MajorDom-Systems/integration-template#progress)
+README ships this and the [Quality Checklist](quality.md) as a fillable copy — tick items there as
+you implement them. The list below is the reference.
+
 - [ ] Discovery service listeners fire when devices are found, and the controller calls `self.dependencies.output.controller_did_receive_discovery`
 - [ ] Discovery services registered via `self.dependencies.zeroconf_discovery_service`, `ssdp_discovery_service`, and/or `ble_discovery_service` as appropriate; cancel closures saved and called in `stop`
 - [ ] Discovery of devices already paired to the Hub on reconnect, e.g. after a reboot (`self.dependencies.output.controller_did_connect_device` is called)
