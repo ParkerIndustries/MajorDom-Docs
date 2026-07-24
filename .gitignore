@@ -165,3 +165,4 @@ ignore/
 
 # generated llms source dumps (built at deploy time by scripts/build_llms.py)
 /docs/llms/
+docs/llms/*.txt
